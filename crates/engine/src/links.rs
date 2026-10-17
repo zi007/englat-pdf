@@ -1,15 +1,14 @@
-//! Where ENGLAT PDF and the ArtCraft community live on the web. One table, so the Help menu, the
-//! About dialog, the home screen, the CLI and the README agree.
+//! Where ENGLAT PDF lives on the web. One table, so the Help menu, the About dialog, the home
+//! screen, the CLI and the README agree.
 
 use icu_properties::props::Script;
 use std::path::{Path, PathBuf};
 
-/// The app's name in ArtCraft URLs (`getartcraft.com/apps/{APP}`, `github.com/storytold/{APP}`).
+/// The app's name in its GitHub URL (`github.com/zi007/{APP}`).
 pub const APP: &str = "englat-pdf";
 
-pub const DISCORD: &str = "https://discord.gg/artcraft";
-pub const WEBSITE: &str = "https://getartcraft.com";
-pub const APP_PAGE: &str = "https://github.com/zi007/englat-pdf";
+pub const WEBSITE: &str = "https://englat.com";
+pub const APP_PAGE: &str = "https://pdf.englat.com";
 pub const GITHUB: &str = "https://github.com/zi007/englat-pdf";
 
 /// A link and the registry command that opens it.
@@ -22,12 +21,11 @@ pub struct Link {
     pub icon: &'static str,
 }
 
-/// In the order they are shown. Discord comes first: it is where people get help fastest.
+/// In the order they are shown.
 pub const LINKS: &[Link] = &[
-    Link { command: "help.discord", label: "Join the ArtCraft Discord", url: DISCORD, icon: "messages-square" },
-    Link { command: "help.app_page", label: "ENGLAT PDF web page", url: APP_PAGE, icon: "globe" },
+    Link { command: "help.website", label: "ENGLAT.COM", url: WEBSITE, icon: "globe" },
+    Link { command: "help.app_page", label: "ENGLAT PDF web page", url: APP_PAGE, icon: "external-link" },
     Link { command: "help.github", label: "ENGLAT PDF on GitHub", url: GITHUB, icon: "code-xml" },
-    Link { command: "help.website", label: "ArtCraft website", url: WEBSITE, icon: "external-link" },
 ];
 
 pub fn for_command(id: &str) -> Option<&'static Link> {
@@ -554,9 +552,8 @@ mod tests {
     }
 
     #[test]
-    fn urls_follow_the_artcraft_scheme() {
-        assert_eq!(super::APP_PAGE, format!("{}/apps/{}", super::WEBSITE, super::APP));
-        assert_eq!(super::GITHUB, format!("https://github.com/storytold/{}", super::APP));
+    fn urls_follow_the_englat_scheme() {
+        assert_eq!(super::GITHUB, format!("https://github.com/zi007/{}", super::APP));
         for l in super::LINKS {
             assert!(l.url.starts_with("https://"), "{}", l.url);
             assert!(crate::commands::command(l.command).is_some(), "{} is a registered command", l.command);

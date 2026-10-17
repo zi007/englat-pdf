@@ -1,5 +1,5 @@
 [package]
-name = "pdfcraft-xfdf"
+name = "englat-pdf-xfdf"
 description = "Comment and form data exchange: XFDF (ISO 19444-1) and FDF import/export, form data as XML, CSV and tab-delimited text"
 version.workspace = true
 edition.workspace = true
@@ -9,9 +9,9 @@ license.workspace = true
 workspace = true
 
 [dependencies]
-pdfcraft-cos = { workspace = true }
-pdfcraft-annot = { workspace = true }
-pdfcraft-forms = { workspace = true }
-pdfcraft-model = { workspace = true }
+englat-pdf-cos = { workspace = true }
+englat-pdf-annot = { workspace = true }
+englat-pdf-forms = { workspace = true }
+englat-pdf-model = { workspace = true }
 roxmltree = "0.20"
 thiserror = { workspace = true }

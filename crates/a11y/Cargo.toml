@@ -1,5 +1,5 @@
 [package]
-name = "pdfcraft-a11y"
+name = "englat-pdf-a11y"
 description = "Accessibility: the Accessibility Checker (32 rules), its report and fixes"
 version.workspace = true
 edition.workspace = true
@@ -11,9 +11,9 @@ repository.workspace = true
 workspace = true
 
 [dependencies]
-pdfcraft-cos = { workspace = true }
-pdfcraft-model = { workspace = true }
-pdfcraft-content = { workspace = true }
-pdfcraft-filters = { workspace = true }
-pdfcraft-fonts = { workspace = true }
+englat-pdf-cos = { workspace = true }
+englat-pdf-model = { workspace = true }
+englat-pdf-content = { workspace = true }
+englat-pdf-filters = { workspace = true }
+englat-pdf-fonts = { workspace = true }
 thiserror.workspace = true

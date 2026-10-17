@@ -1,5 +1,5 @@
 [package]
-name = "pdfcraft-annot"
+name = "englat-pdf-annot"
 description = "Annotations (comments): builders, appearance streams and edits, ISO 32000-2 §12.5"
 version.workspace = true
 edition.workspace = true
@@ -9,9 +9,9 @@ license.workspace = true
 workspace = true
 
 [dependencies]
-pdfcraft-cos = { workspace = true }
-pdfcraft-fonts = { workspace = true }
-pdfcraft-model = { workspace = true }
+englat-pdf-cos = { workspace = true }
+englat-pdf-fonts = { workspace = true }
+englat-pdf-model = { workspace = true }
 thiserror = { workspace = true }
 
 [dev-dependencies]

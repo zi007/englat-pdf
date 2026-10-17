@@ -1,6 +1,6 @@
 [package]
-name = "pdfcraft-engine"
-description = "PdfCraft engine façade: session, documents, command/tool catalogue"
+name = "englat-pdf-engine"
+description = "ENGLAT PDF engine façade: session, documents, command/tool catalogue"
 version.workspace = true
 edition.workspace = true
 license.workspace = true
@@ -10,31 +10,31 @@ workspace = true
 
 [dependencies]
 craft-docpath = { workspace = true }
-pdfcraft-measure = { workspace = true }
+englat-pdf-measure = { workspace = true }
 image = { version = "0.25", default-features = false, features = ["png", "jpeg", "tiff"] }
-pdfcraft-render = { workspace = true }
-pdfcraft-cos = { workspace = true }
-pdfcraft-organize = { workspace = true }
-pdfcraft-annot = { workspace = true }
-pdfcraft-forms = { workspace = true }
-pdfcraft-xfa = { workspace = true }
-pdfcraft-edit = { workspace = true }
-pdfcraft-audit = { workspace = true }
-pdfcraft-redact = { workspace = true }
-pdfcraft-print = { workspace = true }
-pdfcraft-xfdf = { workspace = true }
-pdfcraft-sign = { workspace = true }
-pdfcraft-optimize = { workspace = true }
-pdfcraft-a11y = { workspace = true }
-pdfcraft-ocr = { workspace = true }
-pdfcraft-js = { workspace = true }
-pdfcraft-compare = { workspace = true }
-pdfcraft-preflight = { workspace = true }
-pdfcraft-export = { workspace = true }
-pdfcraft-fonts = { workspace = true }
-pdfcraft-create = { workspace = true }
-pdfcraft-model = { workspace = true }
-pdfcraft-geom = { workspace = true }
+englat-pdf-render = { workspace = true }
+englat-pdf-cos = { workspace = true }
+englat-pdf-organize = { workspace = true }
+englat-pdf-annot = { workspace = true }
+englat-pdf-forms = { workspace = true }
+englat-pdf-xfa = { workspace = true }
+englat-pdf-edit = { workspace = true }
+englat-pdf-audit = { workspace = true }
+englat-pdf-redact = { workspace = true }
+englat-pdf-print = { workspace = true }
+englat-pdf-xfdf = { workspace = true }
+englat-pdf-sign = { workspace = true }
+englat-pdf-optimize = { workspace = true }
+englat-pdf-a11y = { workspace = true }
+englat-pdf-ocr = { workspace = true }
+englat-pdf-js = { workspace = true }
+englat-pdf-compare = { workspace = true }
+englat-pdf-preflight = { workspace = true }
+englat-pdf-export = { workspace = true }
+englat-pdf-fonts = { workspace = true }
+englat-pdf-create = { workspace = true }
+englat-pdf-model = { workspace = true }
+englat-pdf-geom = { workspace = true }
 thiserror = { workspace = true }
 png = "0.18"
 # Already in the graph (url and idna through webbrowser, icu_properties through boa): they show

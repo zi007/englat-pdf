@@ -1,14 +1,14 @@
 //! Community links: the Discord button is one click away everywhere; Help menu, About dialog and
-//! home screen open the ArtCraft and PdfCraft pages.
+//! home screen open the ArtCraft and ENGLAT PDF pages.
 
 use egui_kittest::Harness;
 use egui_kittest::kittest::Queryable;
-use pdfcraft_engine::links;
-use pdfcraft_ui_egui::{Dialog, PdfCraftApp};
+use englat_pdf_engine::links;
+use englat_pdf_ui_egui::{Dialog, EnglatPdfApp};
 
-fn harness(setup: impl FnOnce(&mut PdfCraftApp) + 'static) -> Harness<'static, PdfCraftApp> {
+fn harness(setup: impl FnOnce(&mut EnglatPdfApp) + 'static) -> Harness<'static, EnglatPdfApp> {
     let mut h = Harness::builder().with_size(egui::vec2(1400.0, 900.0)).build_eframe(move |_cc| {
-        let mut app = PdfCraftApp::new();
+        let mut app = EnglatPdfApp::new();
         app.set_option("language", "en").unwrap();
         setup(&mut app);
         app
@@ -30,8 +30,8 @@ fn discord_button_in_the_top_bar_opens_discord() {
 fn home_screen_links() {
     for (label, url) in [
         ("Join our Discord", links::DISCORD),
-        ("PdfCraft web page", "https://getartcraft.com/apps/pdfcraft"),
-        ("PdfCraft on GitHub", "https://github.com/storytold/pdfcraft"),
+        ("ENGLAT PDF web page", "https://github.com/zi007/englat-pdf"),
+        ("ENGLAT PDF on GitHub", "https://github.com/zi007/englat-pdf"),
         ("ArtCraft website", "https://getartcraft.com"),
     ] {
         let mut h = harness(|_| {});
@@ -62,7 +62,7 @@ fn help_commands_open_each_link() {
         let mut h = harness(|_| {});
         assert!(h.state_mut().execute(l.command), "{}", l.command);
         assert_eq!(h.state().last_opened_url.as_deref(), Some(l.url));
-        assert_eq!(pdfcraft_engine::commands::command(l.command).unwrap().menu, Some("Help"));
+        assert_eq!(englat_pdf_engine::commands::command(l.command).unwrap().menu, Some("Help"));
     }
 }
 
@@ -73,7 +73,7 @@ fn help_commands_open_each_link() {
 /// fixed number of frames is a guess at how long that takes: it was too few after the 0.5.0
 /// contributors refresh (78 names instead of 5) on some machines, the click on Table landed where
 /// the button had been, and the table never opened (#671).
-fn settled<'a>(h: &'a mut Harness<'static, PdfCraftApp>, label: &'a str) -> egui_kittest::Node<'a> {
+fn settled<'a>(h: &'a mut Harness<'static, EnglatPdfApp>, label: &'a str) -> egui_kittest::Node<'a> {
     let mut last = None;
     for _ in 0..60 {
         h.run_steps(1);

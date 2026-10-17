@@ -3933,7 +3933,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "pdfcraft"
+name = "englat-pdf"
 version = "0.8.0"
 dependencies = [
  "craft-quit",
@@ -3941,8 +3941,8 @@ dependencies = [
  "egui",
  "fmv-macos-events",
  "log",
- "pdfcraft-engine",
- "pdfcraft-ui-egui",
+ "englat-pdf-engine",
+ "englat-pdf-ui-egui",
  "pollster 1.0.1",
  "raw-window-handle",
  "rustls-native-certs",
@@ -3958,54 +3958,54 @@ dependencies = [
 ]
 
 [[package]]
-name = "pdfcraft-a11y"
+name = "englat-pdf-a11y"
 version = "0.8.0"
 dependencies = [
- "pdfcraft-content",
- "pdfcraft-cos",
- "pdfcraft-filters",
- "pdfcraft-fonts",
- "pdfcraft-model",
+ "englat-pdf-content",
+ "englat-pdf-cos",
+ "englat-pdf-filters",
+ "englat-pdf-fonts",
+ "englat-pdf-model",
  "thiserror 2.0.21",
 ]
 
 [[package]]
-name = "pdfcraft-annot"
+name = "englat-pdf-annot"
 version = "0.8.0"
 dependencies = [
  "hayro-syntax",
- "pdfcraft-cos",
- "pdfcraft-fonts",
- "pdfcraft-model",
+ "englat-pdf-cos",
+ "englat-pdf-fonts",
+ "englat-pdf-model",
  "thiserror 2.0.21",
 ]
 
 [[package]]
-name = "pdfcraft-audit"
+name = "englat-pdf-audit"
 version = "0.8.0"
 dependencies = [
- "pdfcraft-content",
- "pdfcraft-cos",
- "pdfcraft-edit",
- "pdfcraft-model",
+ "englat-pdf-content",
+ "englat-pdf-cos",
+ "englat-pdf-edit",
+ "englat-pdf-model",
  "thiserror 2.0.21",
 ]
 
 [[package]]
-name = "pdfcraft-automation"
+name = "englat-pdf-automation"
 version = "0.8.0"
 dependencies = [
  "base64 0.22.1",
  "flate2",
  "image",
- "pdfcraft-cos",
- "pdfcraft-engine",
- "pdfcraft-fonts",
- "pdfcraft-model",
- "pdfcraft-organize",
- "pdfcraft-platform",
- "pdfcraft-render",
- "pdfcraft-xfa",
+ "englat-pdf-cos",
+ "englat-pdf-engine",
+ "englat-pdf-fonts",
+ "englat-pdf-model",
+ "englat-pdf-organize",
+ "englat-pdf-platform",
+ "englat-pdf-render",
+ "englat-pdf-xfa",
  "png 0.18.1",
  "serde_json",
  "sha2 0.11.0",
@@ -4013,56 +4013,56 @@ dependencies = [
 ]
 
 [[package]]
-name = "pdfcraft-cli"
+name = "englat-pdf-cli"
 version = "0.8.0"
 dependencies = [
  "base64 0.22.1",
- "pdfcraft-audit",
- "pdfcraft-automation",
- "pdfcraft-cos",
- "pdfcraft-engine",
- "pdfcraft-platform",
- "pdfcraft-render",
+ "englat-pdf-audit",
+ "englat-pdf-automation",
+ "englat-pdf-cos",
+ "englat-pdf-engine",
+ "englat-pdf-platform",
+ "englat-pdf-render",
  "rustix 1.1.5",
  "serde_json",
  "winresource",
 ]
 
 [[package]]
-name = "pdfcraft-compare"
+name = "englat-pdf-compare"
 version = "0.8.0"
 
 [[package]]
-name = "pdfcraft-content"
+name = "englat-pdf-content"
 version = "0.8.0"
 dependencies = [
- "pdfcraft-cos",
+ "englat-pdf-cos",
 ]
 
 [[package]]
-name = "pdfcraft-cos"
+name = "englat-pdf-cos"
 version = "0.8.0"
 dependencies = [
  "hayro-syntax",
- "pdfcraft-crypt",
- "pdfcraft-filters",
- "pdfcraft-oracle",
- "pdfcraft-testkit",
+ "englat-pdf-crypt",
+ "englat-pdf-filters",
+ "englat-pdf-oracle",
+ "englat-pdf-testkit",
  "proptest",
  "serde_json",
  "thiserror 2.0.21",
 ]
 
 [[package]]
-name = "pdfcraft-create"
+name = "englat-pdf-create"
 version = "0.8.0"
 dependencies = [
  "encoding_rs",
  "hayro-syntax",
  "image",
- "pdfcraft-cos",
- "pdfcraft-fonts",
- "pdfcraft-model",
+ "englat-pdf-cos",
+ "englat-pdf-fonts",
+ "englat-pdf-model",
  "png 0.18.1",
  "thiserror 2.0.21",
  "tiff",
@@ -4070,7 +4070,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "pdfcraft-crypt"
+name = "englat-pdf-crypt"
 version = "0.8.0"
 dependencies = [
  "aes",
@@ -4082,22 +4082,22 @@ dependencies = [
 ]
 
 [[package]]
-name = "pdfcraft-edit"
+name = "englat-pdf-edit"
 version = "0.8.0"
 dependencies = [
  "hayro-syntax",
  "kurbo 0.13.1",
- "pdfcraft-annot",
- "pdfcraft-content",
- "pdfcraft-cos",
- "pdfcraft-fonts",
- "pdfcraft-model",
+ "englat-pdf-annot",
+ "englat-pdf-content",
+ "englat-pdf-cos",
+ "englat-pdf-fonts",
+ "englat-pdf-model",
  "thiserror 2.0.21",
  "unicode-bidi",
 ]
 
 [[package]]
-name = "pdfcraft-engine"
+name = "englat-pdf-engine"
 version = "0.8.0"
 dependencies = [
  "chrono",
@@ -4105,30 +4105,30 @@ dependencies = [
  "icu_properties",
  "idna",
  "image",
- "pdfcraft-a11y",
- "pdfcraft-annot",
- "pdfcraft-audit",
- "pdfcraft-compare",
- "pdfcraft-cos",
- "pdfcraft-create",
- "pdfcraft-edit",
- "pdfcraft-export",
- "pdfcraft-fonts",
- "pdfcraft-forms",
- "pdfcraft-geom",
- "pdfcraft-js",
- "pdfcraft-measure",
- "pdfcraft-model",
- "pdfcraft-ocr",
- "pdfcraft-optimize",
- "pdfcraft-organize",
- "pdfcraft-preflight",
- "pdfcraft-print",
- "pdfcraft-redact",
- "pdfcraft-render",
- "pdfcraft-sign",
- "pdfcraft-xfa",
- "pdfcraft-xfdf",
+ "englat-pdf-a11y",
+ "englat-pdf-annot",
+ "englat-pdf-audit",
+ "englat-pdf-compare",
+ "englat-pdf-cos",
+ "englat-pdf-create",
+ "englat-pdf-edit",
+ "englat-pdf-export",
+ "englat-pdf-fonts",
+ "englat-pdf-forms",
+ "englat-pdf-geom",
+ "englat-pdf-js",
+ "englat-pdf-measure",
+ "englat-pdf-model",
+ "englat-pdf-ocr",
+ "englat-pdf-optimize",
+ "englat-pdf-organize",
+ "englat-pdf-preflight",
+ "englat-pdf-print",
+ "englat-pdf-redact",
+ "englat-pdf-render",
+ "englat-pdf-sign",
+ "englat-pdf-xfa",
+ "englat-pdf-xfdf",
  "png 0.18.1",
  "thiserror 2.0.21",
  "unicode-segmentation",
@@ -4136,14 +4136,14 @@ dependencies = [
 ]
 
 [[package]]
-name = "pdfcraft-export"
+name = "englat-pdf-export"
 version = "0.8.0"
 dependencies = [
  "flate2",
 ]
 
 [[package]]
-name = "pdfcraft-filters"
+name = "englat-pdf-filters"
 version = "0.8.0"
 dependencies = [
  "flate2",
@@ -4153,98 +4153,98 @@ dependencies = [
 ]
 
 [[package]]
-name = "pdfcraft-fonts"
+name = "englat-pdf-fonts"
 version = "0.8.0"
 dependencies = [
  "harfrust",
- "pdfcraft-cos",
+ "englat-pdf-cos",
  "skrifa 0.44.0",
  "unicode-bidi",
 ]
 
 [[package]]
-name = "pdfcraft-forms"
+name = "englat-pdf-forms"
 version = "0.8.0"
 dependencies = [
  "hayro-syntax",
- "pdfcraft-content",
- "pdfcraft-cos",
- "pdfcraft-fonts",
- "pdfcraft-model",
+ "englat-pdf-content",
+ "englat-pdf-cos",
+ "englat-pdf-fonts",
+ "englat-pdf-model",
  "thiserror 2.0.21",
 ]
 
 [[package]]
-name = "pdfcraft-geom"
+name = "englat-pdf-geom"
 version = "0.8.0"
 
 [[package]]
-name = "pdfcraft-js"
+name = "englat-pdf-js"
 version = "0.8.0"
 dependencies = [
  "boa_engine",
 ]
 
 [[package]]
-name = "pdfcraft-measure"
+name = "englat-pdf-measure"
 version = "0.8.0"
 dependencies = [
- "pdfcraft-annot",
- "pdfcraft-content",
- "pdfcraft-cos",
- "pdfcraft-model",
- "pdfcraft-testkit",
+ "englat-pdf-annot",
+ "englat-pdf-content",
+ "englat-pdf-cos",
+ "englat-pdf-model",
+ "englat-pdf-testkit",
  "serde",
  "thiserror 2.0.21",
 ]
 
 [[package]]
-name = "pdfcraft-model"
+name = "englat-pdf-model"
 version = "0.8.0"
 dependencies = [
- "pdfcraft-cos",
+ "englat-pdf-cos",
 ]
 
 [[package]]
-name = "pdfcraft-ocr"
+name = "englat-pdf-ocr"
 version = "0.8.0"
 dependencies = [
  "ocrs",
- "pdfcraft-fonts",
+ "englat-pdf-fonts",
  "rten",
  "thiserror 2.0.21",
 ]
 
 [[package]]
-name = "pdfcraft-optimize"
+name = "englat-pdf-optimize"
 version = "0.8.0"
 dependencies = [
  "image",
- "pdfcraft-annot",
- "pdfcraft-content",
- "pdfcraft-cos",
- "pdfcraft-model",
- "pdfcraft-render",
+ "englat-pdf-annot",
+ "englat-pdf-content",
+ "englat-pdf-cos",
+ "englat-pdf-model",
+ "englat-pdf-render",
  "thiserror 2.0.21",
 ]
 
 [[package]]
-name = "pdfcraft-oracle"
+name = "englat-pdf-oracle"
 version = "0.8.0"
 
 [[package]]
-name = "pdfcraft-organize"
+name = "englat-pdf-organize"
 version = "0.8.0"
 dependencies = [
  "hayro-syntax",
- "pdfcraft-content",
- "pdfcraft-cos",
- "pdfcraft-oracle",
+ "englat-pdf-content",
+ "englat-pdf-cos",
+ "englat-pdf-oracle",
  "thiserror 2.0.21",
 ]
 
 [[package]]
-name = "pdfcraft-platform"
+name = "englat-pdf-platform"
 version = "0.8.0"
 dependencies = [
  "async-channel",
@@ -4254,43 +4254,43 @@ dependencies = [
 ]
 
 [[package]]
-name = "pdfcraft-preflight"
+name = "englat-pdf-preflight"
 version = "0.8.0"
 dependencies = [
- "pdfcraft-content",
- "pdfcraft-cos",
- "pdfcraft-model",
+ "englat-pdf-content",
+ "englat-pdf-cos",
+ "englat-pdf-model",
 ]
 
 [[package]]
-name = "pdfcraft-print"
+name = "englat-pdf-print"
 version = "0.8.0"
 dependencies = [
  "craft-print",
- "pdfcraft-content",
- "pdfcraft-cos",
- "pdfcraft-model",
+ "englat-pdf-content",
+ "englat-pdf-cos",
+ "englat-pdf-model",
  "thiserror 2.0.21",
 ]
 
 [[package]]
-name = "pdfcraft-redact"
+name = "englat-pdf-redact"
 version = "0.8.0"
 dependencies = [
- "pdfcraft-annot",
- "pdfcraft-content",
- "pdfcraft-cos",
- "pdfcraft-edit",
- "pdfcraft-fonts",
- "pdfcraft-forms",
- "pdfcraft-model",
- "pdfcraft-testkit",
- "pdfcraft-xfa",
+ "englat-pdf-annot",
+ "englat-pdf-content",
+ "englat-pdf-cos",
+ "englat-pdf-edit",
+ "englat-pdf-fonts",
+ "englat-pdf-forms",
+ "englat-pdf-model",
+ "englat-pdf-testkit",
+ "englat-pdf-xfa",
  "thiserror 2.0.21",
 ]
 
 [[package]]
-name = "pdfcraft-render"
+name = "englat-pdf-render"
 version = "0.8.0"
 dependencies = [
  "bytemuck",
@@ -4301,15 +4301,15 @@ dependencies = [
  "kurbo 0.13.1",
  "log",
  "lopdf",
- "pdfcraft-cos",
- "pdfcraft-fonts",
+ "englat-pdf-cos",
+ "englat-pdf-fonts",
  "serde",
  "skrifa 0.44.0",
  "thiserror 2.0.21",
 ]
 
 [[package]]
-name = "pdfcraft-sign"
+name = "englat-pdf-sign"
 version = "0.8.0"
 dependencies = [
  "aes",
@@ -4328,9 +4328,9 @@ dependencies = [
  "p384",
  "p521",
  "pbkdf2",
- "pdfcraft-annot",
- "pdfcraft-cos",
- "pdfcraft-fonts",
+ "englat-pdf-annot",
+ "englat-pdf-cos",
+ "englat-pdf-fonts",
  "rc2",
  "ripemd",
  "rsa",
@@ -4343,11 +4343,11 @@ dependencies = [
 ]
 
 [[package]]
-name = "pdfcraft-testkit"
+name = "englat-pdf-testkit"
 version = "0.8.0"
 
 [[package]]
-name = "pdfcraft-ui-egui"
+name = "englat-pdf-ui-egui"
 version = "0.8.0"
 dependencies = [
  "arboard",
@@ -4367,13 +4367,13 @@ dependencies = [
  "objc2 0.6.4",
  "objc2-app-kit 0.3.2",
  "objc2-foundation 0.3.2",
- "pdfcraft-cos",
- "pdfcraft-engine",
- "pdfcraft-fonts",
- "pdfcraft-model",
- "pdfcraft-platform",
- "pdfcraft-render",
- "pdfcraft-xfa",
+ "englat-pdf-cos",
+ "englat-pdf-engine",
+ "englat-pdf-fonts",
+ "englat-pdf-model",
+ "englat-pdf-platform",
+ "englat-pdf-render",
+ "englat-pdf-xfa",
  "png 0.18.1",
  "pollster 1.0.1",
  "rfd",
@@ -4391,25 +4391,25 @@ dependencies = [
 ]
 
 [[package]]
-name = "pdfcraft-web"
+name = "englat-pdf-web"
 version = "0.8.0"
 dependencies = [
  "eframe",
  "egui",
  "js-sys",
- "pdfcraft-ui-egui",
+ "englat-pdf-ui-egui",
  "wasm-bindgen-futures",
  "web-sys",
 ]
 
 [[package]]
-name = "pdfcraft-xfa"
+name = "englat-pdf-xfa"
 version = "0.8.0"
 dependencies = [
  "base64 0.22.1",
  "image",
- "pdfcraft-cos",
- "pdfcraft-fonts",
+ "englat-pdf-cos",
+ "englat-pdf-fonts",
  "png 0.18.1",
  "roxmltree",
  "sha2 0.11.0",
@@ -4417,13 +4417,13 @@ dependencies = [
 ]
 
 [[package]]
-name = "pdfcraft-xfdf"
+name = "englat-pdf-xfdf"
 version = "0.8.0"
 dependencies = [
- "pdfcraft-annot",
- "pdfcraft-cos",
- "pdfcraft-forms",
- "pdfcraft-model",
+ "englat-pdf-annot",
+ "englat-pdf-cos",
+ "englat-pdf-forms",
+ "englat-pdf-model",
  "roxmltree",
  "thiserror 2.0.21",
 ]
@@ -8027,8 +8027,8 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "lopdf",
- "pdfcraft-cos",
- "pdfcraft-oracle",
+ "englat-pdf-cos",
+ "englat-pdf-oracle",
  "png 0.18.1",
  "serde",
  "serde_json",

@@ -1,8 +1,8 @@
 use std::sync::Arc;
 
-use pdfcraft_annot::{Meta, NewAnnotation, Shape, Style, add_annotation, rect_quad};
-use pdfcraft_cos::{Document, SaveOptions, write_full, write_incremental};
-use pdfcraft_testkit::{Pdf, stream_obj as stream};
+use englat_pdf_annot::{Meta, NewAnnotation, Shape, Style, add_annotation, rect_quad};
+use englat_pdf_cos::{Document, SaveOptions, write_full, write_incremental};
+use englat_pdf_testkit::{Pdf, stream_obj as stream};
 
 use super::*;
 
@@ -40,19 +40,19 @@ fn mark(doc: &mut Document, page: usize, rects: &[[f64; 4]], overlay: &str) {
 
 /// The decoded content streams of a page, joined.
 fn content(doc: &Document, page: usize) -> String {
-    let p = &pdfcraft_model::pages(doc)[page];
+    let p = &englat_pdf_model::pages(doc)[page];
     let (_, data) = page_streams(doc, &p.dict, page).unwrap();
     data.iter().map(|d| String::from_utf8_lossy(d).into_owned()).collect::<Vec<_>>().join("\n")
 }
 
 /// Glyphs (and inline images) of page `page` under `rects` (the verifier's count).
 fn under(doc: &mut Document, page: usize, rects: &[[f64; 4]]) -> usize {
-    let p = pdfcraft_model::pages(doc).swap_remove(page);
+    let p = englat_pdf_model::pages(doc).swap_remove(page);
     let (_, data) = page_streams(doc, &p.dict, page).unwrap();
     let res = p.dict.get(b"Resources").and_then(|r| doc.resolve(r).as_dict().cloned()).unwrap_or_default();
     let mut rep = Report::default();
     let mut scope = Scope::new(rects, Mode::Verify, &mut rep);
-    process(doc, &mut scope, &data, &res, pdfcraft_content::Matrix::IDENTITY).residue
+    process(doc, &mut scope, &data, &res, englat_pdf_content::Matrix::IDENTITY).residue
 }
 
 fn reopen(doc: &Document) -> Document {
@@ -121,7 +121,7 @@ fn operators_split_across_content_streams_are_redacted_whole() {
     assert!(c.contains("KEEP"), "{c}");
     assert_eq!(under(&mut doc, 0, &[[40.0, 95.0, 50.0, 110.0]]), 2, "C and D are where they were");
     // Every operator still has its operands: none was cut off from them.
-    for op in pdfcraft_content::parse(c.as_bytes()).ops {
+    for op in englat_pdf_content::parse(c.as_bytes()).ops {
         let want = match op.op.as_slice() {
             b"TJ" | b"Tj" => 1,
             b"BDC" | b"Tf" | b"Td" => 2,
@@ -162,11 +162,11 @@ fn rotated_text_and_composite_fonts() {
     let mut doc = one_page(src, "", vec![]);
     let font_ref = doc.add(Object::Dict(Dict::new()));
     let parsed = {
-        let mut lx = pdfcraft_cos::Lexer::new(&t0, 0);
+        let mut lx = englat_pdf_cos::Lexer::new(&t0, 0);
         lx.object().unwrap()
     };
     doc.set(font_ref, parsed);
-    let page = pdfcraft_model::pages(&doc)[0].obj;
+    let page = englat_pdf_model::pages(&doc)[0].obj;
     doc.update_dict(page, |d| {
         let mut res = d.get(b"Resources").and_then(Object::as_dict).cloned().unwrap();
         let mut fonts = res.get(b"Font").and_then(Object::as_dict).cloned().unwrap();
@@ -197,11 +197,11 @@ fn vertical_writing_text_under_a_mark_fails_closed() {
         let mut doc = one_page(src, "", vec![]);
         let font_ref = doc.add(Object::Dict(Dict::new()));
         let parsed = {
-            let mut lx = pdfcraft_cos::Lexer::new(&t0, 0);
+            let mut lx = englat_pdf_cos::Lexer::new(&t0, 0);
             lx.object().unwrap()
         };
         doc.set(font_ref, parsed);
-        let page = pdfcraft_model::pages(&doc)[0].obj;
+        let page = englat_pdf_model::pages(&doc)[0].obj;
         doc.update_dict(page, |d| {
             let mut res = d.get(b"Resources").and_then(Object::as_dict).cloned().unwrap();
             let mut fonts = res.get(b"Font").and_then(Object::as_dict).cloned().unwrap();
@@ -240,7 +240,7 @@ fn images_are_removed_or_have_their_pixels_cleared() {
     assert_eq!((r.images_removed, r.images_cleared), (1, 1), "{r:?}");
     let c = content(&doc, 0);
     assert!(!c.contains("/Im1 Do") && !c.contains("/Im2 Do"), "{c}");
-    let p = pdfcraft_model::pages(&doc).swap_remove(0);
+    let p = englat_pdf_model::pages(&doc).swap_remove(0);
     let res = doc.resolve(p.dict.get(b"Resources").unwrap()).as_dict().cloned().unwrap();
     let xo = doc.resolve(res.get(b"XObject").unwrap()).as_dict().cloned().unwrap();
     let new = xo.iter().find(|(k, _)| k.starts_with(b"PCRedacted")).map(|(_, v)| v.clone()).expect("a cleared copy");
@@ -327,7 +327,7 @@ fn redacted_images_and_forms_do_not_survive_a_full_rewrite_save() {
 
     // The unrelated image drawn only on page 2 stays referenced and intact.
     let saved = Document::open(Arc::new(bytes)).unwrap();
-    let keep = pdfcraft_model::pages(&saved).swap_remove(1);
+    let keep = englat_pdf_model::pages(&saved).swap_remove(1);
     let res = saved.resolve(keep.dict.get(b"Resources").unwrap()).as_dict().cloned().unwrap();
     let xo = saved.resolve(res.get(b"XObject").unwrap()).as_dict().cloned().unwrap();
     let kref = xo.get(b"ImKeep").and_then(Object::as_ref).expect("ImKeep still referenced");
@@ -366,7 +366,7 @@ fn two_pages_one_resource_dictionary(inherited: bool, again: bool) -> Document {
 
 /// The samples of the image a page's (possibly inherited) resources name `name`.
 fn named_image(doc: &Document, page: usize, name: &[u8]) -> Option<Vec<u8>> {
-    let p = pdfcraft_model::pages(doc).swap_remove(page);
+    let p = englat_pdf_model::pages(doc).swap_remove(page);
     let res = doc.resolve(p.dict.get(b"Resources")?).as_dict().cloned()?;
     let xo = doc.resolve(res.get(b"XObject")?).as_dict().cloned()?;
     match &*doc.get(xo.get(name)?.as_ref()?) {
@@ -474,7 +474,7 @@ fn redacting_an_xfa_field_drops_the_xfa_packet_so_its_value_cannot_survive() {
         ),
     ];
     let mut doc = pdf(objs);
-    assert_eq!(pdfcraft_forms::fields(&doc).len(), 1, "the XFA-bound field is present before");
+    assert_eq!(englat_pdf_forms::fields(&doc).len(), 1, "the XFA-bound field is present before");
     mark(&mut doc, 0, &[[72.0, 200.0, 272.0, 220.0]], "");
     let r = apply(&mut doc, None).unwrap();
     assert!(r.fields >= 1 && r.xfa_removed, "{r:?}");
@@ -508,12 +508,12 @@ fn comments_links_and_fields_under_a_mark_go() {
         &Meta::default(),
     )
     .unwrap();
-    pdfcraft_forms::add_field(&mut doc, 0, [10.0, 50.0, 100.0, 70.0], &pdfcraft_forms::NewField::Text { multiline: false }, Some("ssn")).unwrap();
+    englat_pdf_forms::add_field(&mut doc, 0, [10.0, 50.0, 100.0, 70.0], &englat_pdf_forms::NewField::Text { multiline: false }, Some("ssn")).unwrap();
     mark(&mut doc, 0, &[[0.0, 0.0, 120.0, 80.0]], "REDACTED");
     let r = apply(&mut doc, None).unwrap();
     assert_eq!((r.annotations, r.fields), (1, 1), "{r:?}");
-    assert!(pdfcraft_forms::fields(&doc).is_empty());
-    let p = pdfcraft_model::pages(&doc).swap_remove(0);
+    assert!(englat_pdf_forms::fields(&doc).is_empty());
+    let p = englat_pdf_model::pages(&doc).swap_remove(0);
     assert_eq!(annots_of(&doc, &p.dict).len(), 1, "only the far rectangle stays");
     let c = content(&doc, 0);
     assert!(c.contains("(REDACTED) Tj"), "overlay text: {c}");
@@ -533,7 +533,7 @@ fn nothing_to_apply_and_clearing_marks() {
 #[test]
 fn unreadable_content_fails_closed() {
     let mut doc = one_page(b"", "", vec![]);
-    let page = pdfcraft_model::pages(&doc)[0].obj;
+    let page = englat_pdf_model::pages(&doc)[0].obj;
     let bad = doc.add(Object::Stream(Stream::from_raw(
         {
             let mut d = Dict::new();
@@ -578,8 +578,8 @@ fn hidden_fixture() -> Document {
     let mut doc = pdf(objs);
     let info = doc.add(Object::Dict({
         let mut d = Dict::new();
-        d.set(b"Title".to_vec(), pdfcraft_cos::PdfString::text("Secret plan"));
-        d.set(b"Author".to_vec(), pdfcraft_cos::PdfString::text("Ada"));
+        d.set(b"Title".to_vec(), englat_pdf_cos::PdfString::text("Secret plan"));
+        d.set(b"Author".to_vec(), englat_pdf_cos::PdfString::text("Ada"));
         d
     }));
     doc.trailer_mut().set(b"Info".to_vec(), Object::Ref(info));
@@ -621,8 +621,8 @@ fn hidden_information_is_counted_and_removed() {
     for k in [&b"Outlines"[..], b"OpenAction", b"PieceInfo", b"AcroForm", b"Metadata"] {
         assert!(!cat.contains(k), "{}", String::from_utf8_lossy(k));
     }
-    assert!(pdfcraft_forms::fields(&doc).is_empty());
-    let p = pdfcraft_model::pages(&doc).swap_remove(0);
+    assert!(englat_pdf_forms::fields(&doc).is_empty());
+    let p = englat_pdf_model::pages(&doc).swap_remove(0);
     assert!(annots_of(&doc, &p.dict).is_empty());
     let shown = doc.object_numbers().into_iter().any(|n| match &*doc.get(ObjRef::new(n, doc.generation(n))) {
         Object::Stream(s) => s.decoded().is_ok_and(|d| d.windows(5).any(|w| w == b"(Ada)")),
@@ -650,7 +650,7 @@ fn removing_comments_keeps_annotations_that_are_not_comments() {
     assert_eq!(counts[&Hidden::Comments], 1, "only the Square");
     assert_eq!(remove_hidden(&mut doc, &[Hidden::Comments]).unwrap(), [(Hidden::Comments, 1)]);
     let doc = reopen(&doc);
-    let p = pdfcraft_model::pages(&doc).swap_remove(0);
+    let p = englat_pdf_model::pages(&doc).swap_remove(0);
     let left: Vec<String> = annots_of(&doc, &p.dict)
         .iter()
         .filter_map(|a| doc.resolve(a).as_dict().and_then(|d| d.name(b"Subtype")).map(|s| String::from_utf8_lossy(s).into_owned()))
@@ -661,7 +661,7 @@ fn removing_comments_keeps_annotations_that_are_not_comments() {
 #[test]
 fn overlay_text_takes_its_font_size_colour_alignment_and_repeats() {
     let mut doc = one_page(b"BT /F1 12 Tf 20 250 Td (Secret salary figures) Tj ET", "", Vec::new());
-    let look = pdfcraft_annot::OverlayLook { font: pdfcraft_annot::OverlayFont::Courier, size: 8.0, color: [0.0, 0.0, 1.0], align: 0, repeat: true };
+    let look = englat_pdf_annot::OverlayLook { font: englat_pdf_annot::OverlayFont::Courier, size: 8.0, color: [0.0, 0.0, 1.0], align: 0, repeat: true };
     let shape = Shape::Redact { quads: vec![rect_quad([10.0, 200.0, 290.0, 270.0])], overlay: "REDACTED".into(), look };
     let style = Style::default_for(&shape);
     add_annotation(&mut doc, &NewAnnotation { page: 0, shape, style, contents: String::new(), author: "T".into() }, &Meta::default()).unwrap();
@@ -675,7 +675,7 @@ fn overlay_text_takes_its_font_size_colour_alignment_and_repeats() {
     // 70 pt high at 8 pt × 1.2 leading: several lines, each the word repeated.
     assert!(c.matches(" Tm (REDACTED REDACTED").count() >= 5, "{c}");
     assert!(c.contains("1 0 0 1 11 "), "left aligned at the area's edge: {c}");
-    let p = &pdfcraft_model::pages(&doc)[0];
+    let p = &englat_pdf_model::pages(&doc)[0];
     let fonts = p
         .dict
         .get(b"Resources")
@@ -752,7 +752,7 @@ fn grouped_marks_keep_overlay_order_and_ignore_duplicate_page_selections() {
     })
     .unwrap();
     let mut second = original_mark.as_dict().unwrap().clone();
-    second.set(b"OverlayText".to_vec(), Object::String(pdfcraft_cos::PdfString::literal(b"Y".to_vec())));
+    second.set(b"OverlayText".to_vec(), Object::String(englat_pdf_cos::PdfString::literal(b"Y".to_vec())));
     let second = doc.add(Object::Dict(second));
     doc.update_dict(ObjRef::new(3, 0), |d| {
         d.set(b"Annots".to_vec(), Object::Array(vec![Object::Ref(ObjRef::new(5, 0)), Object::Ref(second)]));
@@ -826,7 +826,7 @@ fn repeated_overlay_timing_probe() {
 #[test]
 fn overlay_text_the_standard_fonts_cannot_draw_is_refused() {
     let mut doc = one_page(b"BT /F1 12 Tf 20 250 Td (Secret salary figures) Tj ET", "", Vec::new());
-    let look = pdfcraft_annot::OverlayLook::default();
+    let look = englat_pdf_annot::OverlayLook::default();
     let mark = |overlay: &str| Shape::Redact { quads: vec![rect_quad([10.0, 200.0, 290.0, 270.0])], overlay: overlay.into(), look };
     let add = |doc: &mut Document, shape: Shape| {
         let style = Style::default_for(&shape);
@@ -838,7 +838,7 @@ fn overlay_text_the_standard_fonts_cannot_draw_is_refused() {
     // A mark whose overlay text was written by another program.
     add(&mut doc, mark("REDACTED")).unwrap();
     let obj = marks(&doc)[0].obj;
-    doc.update_dict(obj, |d| d.set(b"OverlayText".to_vec(), pdfcraft_cos::PdfString::text("机密"))).unwrap();
+    doc.update_dict(obj, |d| d.set(b"OverlayText".to_vec(), englat_pdf_cos::PdfString::text("机密"))).unwrap();
     let before = content(&doc, 0);
     let err = apply(&mut doc, None).unwrap_err();
     assert!(
@@ -848,7 +848,7 @@ fn overlay_text_the_standard_fonts_cannot_draw_is_refused() {
     assert_eq!(content(&doc, 0), before, "nothing was redacted");
     assert_eq!(marks(&doc).len(), 1, "the mark is still there");
     // Cleared, it applies.
-    doc.update_dict(obj, |d| d.set(b"OverlayText".to_vec(), pdfcraft_cos::PdfString::text(""))).unwrap();
+    doc.update_dict(obj, |d| d.set(b"OverlayText".to_vec(), englat_pdf_cos::PdfString::text(""))).unwrap();
     apply(&mut doc, None).unwrap();
     assert!(!content(&reopen(&doc), 0).contains("Secret"));
 }
@@ -884,10 +884,10 @@ fn tags_lose_what_redaction_removed() {
     mark(&mut doc, 0, &[[5.0, 195.0, 60.0, 212.0]], "");
     let report = apply(&mut doc, None).unwrap();
     assert_eq!(report.tags, 1);
-    let secret = doc.get(pdfcraft_cos::ObjRef::new(9, 0)).as_dict().cloned().unwrap();
+    let secret = doc.get(englat_pdf_cos::ObjRef::new(9, 0)).as_dict().cloned().unwrap();
     assert!(secret.get(b"ActualText").is_none() && secret.get(b"Alt").is_none());
     assert!(secret.get(b"K").is_none(), "its marked content is empty now");
-    let public = doc.get(pdfcraft_cos::ObjRef::new(10, 0)).as_dict().cloned().unwrap();
+    let public = doc.get(englat_pdf_cos::ObjRef::new(10, 0)).as_dict().cloned().unwrap();
     assert_eq!(public.get(b"K").and_then(Object::as_int), Some(1));
     assert!(public.get(b"ActualText").is_some(), "untouched content keeps its tags");
 }
@@ -896,7 +896,7 @@ fn assert_no_secret(doc: &Document, secret: &[u8]) {
     let saved = reopen(doc);
     for (r, object) in saved.scan_objects() {
         let mut bytes = Vec::new();
-        pdfcraft_cos::serialize(&object, &mut bytes);
+        englat_pdf_cos::serialize(&object, &mut bytes);
         assert!(!bytes.windows(secret.len()).any(|w| w == secret), "secret remains in object {r:?}");
         if let Object::Stream(s) = &*object {
             let data = s.decoded().unwrap();
@@ -1051,7 +1051,7 @@ fn redacting_every_inheriting_page_retires_the_parent_resources() {
     assert_no_secret(&doc, b"SECRET");
     let mut saved = reopen(&doc);
     for page in 0..kids.len() {
-        assert!(pdfcraft_model::pages(&saved)[page].dict.contains(b"Resources"));
+        assert!(englat_pdf_model::pages(&saved)[page].dict.contains(b"Resources"));
         assert_eq!(under(&mut saved, page, &[[0.0, 190.0, 300.0, 220.0]]), 0);
     }
 }
@@ -1109,7 +1109,7 @@ fn masks_and_alternates_outside_redaction_stay() {
     let report = apply(&mut doc, None).unwrap();
     assert_eq!((report.images_removed, report.images_cleared), (0, 0));
     let saved = reopen(&doc);
-    let page = pdfcraft_model::pages(&saved).swap_remove(0);
+    let page = englat_pdf_model::pages(&saved).swap_remove(0);
     let resources = saved.resolve(page.dict.get(b"Resources").unwrap());
     let xobjects = saved.resolve(resources.as_dict().unwrap().get(b"XObject").unwrap());
     let image = saved.resolve(xobjects.as_dict().unwrap().get(b"Im").unwrap());

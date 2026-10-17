@@ -1,0 +1,14 @@
+[Desktop Entry]
+Type=Application
+Name=ENGLAT PDF
+GenericName=PDF Editor
+Comment=Read, organize, combine, split and secure PDFs
+Exec=englat-pdf %U
+TryExec=englat-pdf
+Icon=com.englat.pdf
+Terminal=false
+StartupNotify=true
+StartupWMClass=com.englat.pdf
+Categories=Office;Viewer;
+Keywords=pdf;viewer;editor;annotate;sign;forms;merge;split;
+MimeType=application/pdf;

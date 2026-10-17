@@ -1,5 +1,5 @@
 [package]
-name = "pdfcraft-redact"
+name = "englat-pdf-redact"
 description = "Redaction (architecture §11.2): marks, apply (glyphs, images, vectors, XObjects, annotations, fields), verification"
 version.workspace = true
 edition.workspace = true
@@ -9,15 +9,15 @@ license.workspace = true
 workspace = true
 
 [dependencies]
-pdfcraft-cos = { workspace = true }
-pdfcraft-content = { workspace = true }
-pdfcraft-fonts = { workspace = true }
-pdfcraft-model = { workspace = true }
-pdfcraft-forms = { workspace = true }
-pdfcraft-edit = { workspace = true }
-pdfcraft-annot = { workspace = true }
-pdfcraft-xfa = { workspace = true }
+englat-pdf-cos = { workspace = true }
+englat-pdf-content = { workspace = true }
+englat-pdf-fonts = { workspace = true }
+englat-pdf-model = { workspace = true }
+englat-pdf-forms = { workspace = true }
+englat-pdf-edit = { workspace = true }
+englat-pdf-annot = { workspace = true }
+englat-pdf-xfa = { workspace = true }
 thiserror = { workspace = true }
 
 [dev-dependencies]
-pdfcraft-testkit = { workspace = true }
+englat-pdf-testkit = { workspace = true }

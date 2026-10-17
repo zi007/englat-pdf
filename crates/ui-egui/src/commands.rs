@@ -1,14 +1,14 @@
-//! What each registered command does in this frontend (`pdfcraft_engine::commands` says
+//! What each registered command does in this frontend (`englat_pdf_engine::commands` says
 //! what it is called, where it appears, which key runs it and when it is enabled).
 //!
 //! Menus, keyboard shortcuts, the palette, the tool panels and automation (`set_option`, and
-//! the control channel later) all call `PdfCraftApp::execute`.
+//! the control channel later) all call `EnglatPdfApp::execute`.
 
-use pdfcraft_engine::Edit;
-use pdfcraft_engine::commands::{self, COMMANDS, CommandSpec, Shortcut};
+use englat_pdf_engine::Edit;
+use englat_pdf_engine::commands::{self, COMMANDS, CommandSpec, Shortcut};
 
 use crate::{
-    Dialog, Mode, PdfCraftApp, PropsTab, RightPanel, SaveTarget,
+    Dialog, Mode, EnglatPdfApp, PropsTab, RightPanel, SaveTarget,
     theme::{ThemeKind, ThemePreference},
     widgets,
 };
@@ -76,7 +76,7 @@ pub(crate) fn command_tip(ctx: &egui::Context, template: &str, id: &str) -> Stri
     crate::i18n::fmt(template, &[("key", &command_shortcut_label(ctx, id))])
 }
 
-impl PdfCraftApp {
+impl EnglatPdfApp {
     /// Whether a registered command can run now. The engine judges the document (security,
     /// contents, undo history); view state it can't see is checked here.
     pub(crate) fn command_enabled(&self, spec: &CommandSpec) -> bool {
@@ -101,7 +101,7 @@ impl PdfCraftApp {
     /// Last-resort guard (AGENTS.md §4): a command that panics is reported and the app, with its
     /// open documents, keeps running. Edits are applied to a copy, so the document is unchanged.
     pub fn execute(&mut self, id: &str) -> bool {
-        match pdfcraft_engine::guard(|| self.execute_unguarded(id)) {
+        match englat_pdf_engine::guard(|| self.execute_unguarded(id)) {
             Ok(done) => done,
             Err(m) => {
                 self.notify_fmt("That didn't work: an internal error stopped it ({m}). Your documents are unchanged.", &[("m", m.as_str())]);
@@ -124,9 +124,9 @@ impl PdfCraftApp {
                 }
                 commands::Needs::Marks(k) if self.active.is_some() => {
                     let kind = match k {
-                        pdfcraft_engine::MarkKind::HeaderFooter => tl!("header or footer"),
-                        pdfcraft_engine::MarkKind::Watermark => tl!("watermark"),
-                        pdfcraft_engine::MarkKind::Background => tl!("background"),
+                        englat_pdf_engine::MarkKind::HeaderFooter => tl!("header or footer"),
+                        englat_pdf_engine::MarkKind::Watermark => tl!("watermark"),
+                        englat_pdf_engine::MarkKind::Background => tl!("background"),
                     };
                     crate::i18n::fmt(tl!("This document has no {kind} to change"), &[("kind", kind)])
                 }
@@ -207,8 +207,8 @@ impl PdfCraftApp {
                 }
                 self.dialog = Some(Dialog::NumberPages);
             }
-            link if pdfcraft_engine::links::for_command(link).is_some() => {
-                if let Some(l) = pdfcraft_engine::links::for_command(link) {
+            link if englat_pdf_engine::links::for_command(link).is_some() => {
+                if let Some(l) = englat_pdf_engine::links::for_command(link) {
                     self.open_url(l.url);
                 }
             }
@@ -307,8 +307,8 @@ impl PdfCraftApp {
                         self.views[i].clear_selection();
                         let style = self.comment_prefs.style(tool);
                         let author = self.comment_prefs.author.clone();
-                        let shape = pdfcraft_engine::Shape::TextMarkup { kind, quads };
-                        self.apply_edit(Edit::AddAnnotation(pdfcraft_engine::NewAnnotation { page, shape, style, contents: String::new(), author }));
+                        let shape = englat_pdf_engine::Shape::TextMarkup { kind, quads };
+                        self.apply_edit(Edit::AddAnnotation(englat_pdf_engine::NewAnnotation { page, shape, style, contents: String::new(), author }));
                     }
                 }
             }
@@ -362,7 +362,7 @@ impl PdfCraftApp {
             | "edit.header_footer.update"
             | "edit.watermark.update"
             | "edit.background.update" => {
-                use pdfcraft_engine::MarkKind as K;
+                use englat_pdf_engine::MarkKind as K;
                 let kind = if id.starts_with("edit.header_footer") {
                     K::HeaderFooter
                 } else if id.starts_with("edit.watermark") {
@@ -381,10 +381,10 @@ impl PdfCraftApp {
                     self.marks_draft.hf.text[5] = "<<Bates Number#6#1##>>".into();
                 }
                 self.marks_draft.focused_box = 5;
-                self.dialog = Some(Dialog::Marks(pdfcraft_engine::MarkKind::HeaderFooter));
+                self.dialog = Some(Dialog::Marks(englat_pdf_engine::MarkKind::HeaderFooter));
             }
             "edit.header_footer.remove" | "edit.watermark.remove" | "edit.background.remove" => {
-                use pdfcraft_engine::MarkKind as K;
+                use englat_pdf_engine::MarkKind as K;
                 let kind = match id {
                     "edit.header_footer.remove" => K::HeaderFooter,
                     "edit.watermark.remove" => K::Watermark,
@@ -420,7 +420,7 @@ impl PdfCraftApp {
             }
             "a11y.report" => self.show_accessibility_report(),
             "a11y.autotag" => {
-                if self.apply_edit(pdfcraft_engine::Edit::AutoTagText) {
+                if self.apply_edit(englat_pdf_engine::Edit::AutoTagText) {
                     self.choose_right_panel(Some(RightPanel::Tags));
                 }
             }
@@ -488,9 +488,9 @@ impl PdfCraftApp {
             }
             "form.tab_order.row" | "form.tab_order.column" | "form.tab_order.structure" => {
                 let order = match id {
-                    "form.tab_order.row" => pdfcraft_engine::TabOrder::Row,
-                    "form.tab_order.column" => pdfcraft_engine::TabOrder::Column,
-                    _ => pdfcraft_engine::TabOrder::Structure,
+                    "form.tab_order.row" => englat_pdf_engine::TabOrder::Row,
+                    "form.tab_order.column" => englat_pdf_engine::TabOrder::Column,
+                    _ => englat_pdf_engine::TabOrder::Structure,
                 };
                 let n = active.and_then(|i| self.session.get(self.views[i].id)).map_or(0, |d| d.info.pages.len());
                 self.apply_edit(Edit::SetTabOrder { pages: (0..n).collect(), order });
@@ -551,10 +551,10 @@ impl PdfCraftApp {
             }
             "form.export_data" => self.export_data_dialog(false, true),
             "form.merge_data" => self.merge_data_dialog(),
-            "export.docx" => self.export_office_dialog(pdfcraft_engine::compare::OfficeFormat::Docx),
-            "export.pptx" => self.export_office_dialog(pdfcraft_engine::compare::OfficeFormat::Pptx),
-            "export.html" => self.export_office_dialog(pdfcraft_engine::compare::OfficeFormat::Html),
-            "export.rtf" => self.export_office_dialog(pdfcraft_engine::compare::OfficeFormat::Rtf),
+            "export.docx" => self.export_office_dialog(englat_pdf_engine::compare::OfficeFormat::Docx),
+            "export.pptx" => self.export_office_dialog(englat_pdf_engine::compare::OfficeFormat::Pptx),
+            "export.html" => self.export_office_dialog(englat_pdf_engine::compare::OfficeFormat::Html),
+            "export.rtf" => self.export_office_dialog(englat_pdf_engine::compare::OfficeFormat::Rtf),
             "form.prepare" => {
                 self.left = crate::LeftPanel::Tool("form");
                 self.reveal_tools();
@@ -758,7 +758,7 @@ fn tab_after(current: Option<usize>, count: usize, forward: bool) -> Option<usiz
 }
 
 /// Render a top-level menu's registered commands (with live labels, shortcuts and enablement).
-pub(crate) fn registry_menu(app: &mut PdfCraftApp, ui: &mut egui::Ui, menu: &str) {
+pub(crate) fn registry_menu(app: &mut EnglatPdfApp, ui: &mut egui::Ui, menu: &str) {
     for spec in commands::menu(menu) {
         let label = commands::current_label(spec, &app.session, app.active_ids().map(|(_, id)| id));
         let label = crate::i18n::menu_label(spec.id, &label);

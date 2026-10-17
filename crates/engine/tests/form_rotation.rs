@@ -1,11 +1,11 @@
-//! Rendering checks for form fields. They live here, not in pdfcraft-forms, because forms and
+//! Rendering checks for form fields. They live here, not in englat-pdf-forms, because forms and
 //! render are both layer 3 and may not depend on each other, not even for tests.
 
 use std::sync::Arc;
 
-use pdfcraft_cos::{Dict, Document, Object, SaveOptions, write_incremental};
-use pdfcraft_forms::{FieldProps, FieldValue, NewField, add_field, set_props, set_value};
-use pdfcraft_render::{PageRenderer, RenderConfig, RenderRequest, RequestKind};
+use englat_pdf_cos::{Dict, Document, Object, SaveOptions, write_incremental};
+use englat_pdf_forms::{FieldProps, FieldValue, NewField, add_field, set_props, set_value};
+use englat_pdf_render::{PageRenderer, RenderConfig, RenderRequest, RequestKind};
 
 fn one_page() -> Document {
     let mut doc = Document::new_empty();

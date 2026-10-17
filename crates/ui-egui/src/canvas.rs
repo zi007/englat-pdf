@@ -9,11 +9,11 @@ use std::ops::Range;
 use std::sync::Arc;
 
 use egui::{Align2, Color32, CornerRadius, Pos2, Rect, Sense, Stroke, TextureHandle, TextureOptions, Vec2, pos2, vec2};
-use pdfcraft_engine::{DocId, Edit};
-use pdfcraft_render::{DestView, DocInfo, LayerOp, LinkTarget, PRINT_TAG, PageText, RenderPool, RenderRequest, RequestKind, Tile, device_pixels};
+use englat_pdf_engine::{DocId, Edit};
+use englat_pdf_render::{DestView, DocInfo, LayerOp, LinkTarget, PRINT_TAG, PageText, RenderPool, RenderRequest, RequestKind, Tile, device_pixels};
 
 use crate::theme::{self, Tokens};
-use crate::{PdfCraftApp, QuickTool, RightPanel, comments, icons, widgets};
+use crate::{EnglatPdfApp, QuickTool, RightPanel, comments, icons, widgets};
 
 /// Logical pixels per PDF point at 100% (96 dpi, like browsers).
 pub const PT: f32 = 96.0 / 72.0;
@@ -116,7 +116,7 @@ impl PageLayout {
         }
     }
 
-    /// Registry command that switches to this base layout (`PdfCraftApp::execute`).
+    /// Registry command that switches to this base layout (`EnglatPdfApp::execute`).
     pub fn command(self) -> &'static str {
         match self {
             Self::Single => "view.layout.single",
@@ -322,14 +322,14 @@ pub struct Snapshot {
 /// A validation badge drawn over a signature widget: the widget rectangle (user space), the verdict it shows, and its hover text.
 pub(crate) struct SignatureBadge {
     pub rect: [f64; 4],
-    pub status: pdfcraft_engine::SignatureStatus,
+    pub status: englat_pdf_engine::SignatureStatus,
     pub summary: &'static str,
 }
 
 /// The validation badges drawn over one page's signature widgets: signed, visible widgets
 /// on this page with coordinates that survive the cast to screen space. Hostile files can
 /// carry NaN, infinite or gigantic rectangles, which must never reach the painter.
-pub(crate) fn signature_badges(signatures: &[pdfcraft_engine::SignatureInfo], page: usize) -> Vec<SignatureBadge> {
+pub(crate) fn signature_badges(signatures: &[englat_pdf_engine::SignatureInfo], page: usize) -> Vec<SignatureBadge> {
     signatures
         .iter()
         .filter(|s| s.signed && s.visible && s.page == Some(page))
@@ -347,7 +347,7 @@ pub(crate) fn signature_badges(signatures: &[pdfcraft_engine::SignatureInfo], pa
 /// A snapshot reads like its source document, plus the snapshot suffix that tells
 /// the tabs apart. Without a title the file name (which already carries the suffix)
 /// is enough.
-pub(crate) fn tab_label(app: &PdfCraftApp, index: usize) -> Option<String> {
+pub(crate) fn tab_label(app: &EnglatPdfApp, index: usize) -> Option<String> {
     let view = app.views.get(index)?;
     let doc = app.session.get(view.id)?;
     let Some(snap) = view.snapshot.as_ref() else { return Some(doc.display_name()) };
@@ -486,7 +486,7 @@ pub struct DocView {
     pub pending_edit: Option<Edit>,
     /// Edit text: the lines per page (with the document generation they were read at), and the
     /// line being edited.
-    pub(crate) edit_lines: HashMap<usize, (u64, Vec<pdfcraft_engine::TextBlock>)>,
+    pub(crate) edit_lines: HashMap<usize, (u64, Vec<englat_pdf_engine::TextBlock>)>,
     pub line_editor: Option<crate::edit_text_ui::LineEditor>,
     /// The box a click switched to while another paragraph was being edited: it opens once the
     /// queued edit has applied, so its index and geometry come from the document it now is (#2022).
@@ -494,7 +494,7 @@ pub struct DocView {
     pub(crate) text_background: crate::edit_text_ui::TextBackground,
     pub(crate) move_background: crate::content_ui::MoveBackground,
     /// Edit text & images: the images per page (by document generation), and the selected one.
-    pub(crate) edit_images: HashMap<usize, (u64, Vec<pdfcraft_engine::PageImage>)>,
+    pub(crate) edit_images: HashMap<usize, (u64, Vec<englat_pdf_engine::PageImage>)>,
     pub(crate) objects: crate::object_ui::ObjectSelection,
     pub image_selection: Option<crate::edit_text_ui::ImageSelection>,
     /// Select tool: the picture clicked, to copy in its original format.
@@ -1421,7 +1421,7 @@ impl DocView {
     }
 
     /// Displayed page size in points for this view rotation.
-    fn display_size(&self, p: &pdfcraft_render::PageInfo) -> (f32, f32) {
+    fn display_size(&self, p: &englat_pdf_render::PageInfo) -> (f32, f32) {
         if self.rotation % 180 == 90 { (p.height, p.width) } else { (p.width, p.height) }
     }
 
@@ -1760,7 +1760,7 @@ impl DocView {
         }
     }
 
-    fn receive_result(&mut self, ctx: &egui::Context, r: pdfcraft_render::RenderedPage) -> usize {
+    fn receive_result(&mut self, ctx: &egui::Context, r: englat_pdf_render::RenderedPage) -> usize {
         if !self.last_queue.contains(&r.request) {
             return 0;
         }
@@ -1927,7 +1927,7 @@ impl DocView {
             }
             PageLayout::TwoUp => {
                 // With a cover page, the first page sits alone on the right.
-                let rows: Vec<&[pdfcraft_render::PageInfo]> = if self.cover && !info.pages.is_empty() {
+                let rows: Vec<&[englat_pdf_render::PageInfo]> = if self.cover && !info.pages.is_empty() {
                     std::iter::once(&info.pages[..1]).chain(info.pages[1..].chunks(2)).collect()
                 } else {
                     info.pages.chunks(2).collect()
@@ -1983,7 +1983,7 @@ impl DocView {
 
 /// The hover popup for an annotation. Replies and Fill & Sign marks (typed text, checks, signatures)
 /// show none: they are page content being edited, not comments.
-fn annotation_hover_text(a: &pdfcraft_render::Annotation) -> Option<String> {
+fn annotation_hover_text(a: &englat_pdf_render::Annotation) -> Option<String> {
     if a.in_reply_to.is_some() || a.fill_sign {
         return None;
     }
@@ -2054,7 +2054,7 @@ impl PageXform {
         &self,
         painter: &egui::Painter,
         tex: egui::TextureId,
-        p: &pdfcraft_render::PageInfo,
+        p: &englat_pdf_render::PageInfo,
         rect: [f64; 4],
         turn: i64,
         color: Color32,
@@ -2062,7 +2062,7 @@ impl PageXform {
         let mut mesh = egui::Mesh::with_texture(tex);
         let (w, h) = (rect[2] - rect[0], rect[3] - rect[1]);
         let (shown_w, shown_h) = if turn % 180 == 0 { (w, h) } else { (h, w) };
-        let [a, b, c, d, e, f] = pdfcraft_model::view_matrix_for(turn, rect);
+        let [a, b, c, d, e, f] = englat_pdf_model::view_matrix_for(turn, rect);
         for (u, v) in [(0.0_f32, 0.0_f32), (1.0, 0.0), (1.0, 1.0), (0.0, 1.0)] {
             // The texture's (u, v), from its top-left, in the picture's upright frame, then in user space.
             let (dx, dy) = (f64::from(u) * shown_w, f64::from(1.0 - v) * shown_h);
@@ -2270,7 +2270,7 @@ pub fn shortcuts(view: &mut DocView, ctx: &egui::Context, speed: crate::scroll_s
 /// keep this much of the previous screen in view.
 const KEY_SCROLL_LINE: f32 = 40.0;
 
-pub fn document_area(app: &mut PdfCraftApp, index: usize, ui: &mut egui::Ui) {
+pub fn document_area(app: &mut EnglatPdfApp, index: usize, ui: &mut egui::Ui) {
     let t = Tokens::get(ui.ctx());
     // Keyboard scrolling applies to this frame's page view only, never later.
     let key_scroll = std::mem::take(&mut app.views[index].key_scroll);
@@ -2644,7 +2644,7 @@ pub fn document_area(app: &mut PdfCraftApp, index: usize, ui: &mut egui::Ui) {
         || app.pending_remote_link.is_some()
         || app.updates.open;
     let mut clicked_link: Option<LinkTarget> = None;
-    let mut remote_open: Option<(pdfcraft_engine::DocId, String, pdfcraft_render::RemoteDestination)> = None;
+    let mut remote_open: Option<(englat_pdf_engine::DocId, String, englat_pdf_render::RemoteDestination)> = None;
     let mut canvas_action: Option<comments::CanvasAction> = None;
     let mut field_menu: Option<FieldMenu> = None;
     let mut open_props: Option<(usize, usize)> = None;
@@ -2905,11 +2905,11 @@ pub fn document_area(app: &mut PdfCraftApp, index: usize, ui: &mut egui::Ui) {
                     let corners = [(vx as f64 - w / 2.0, vy as f64 - h / 2.0), (vx as f64 + w / 2.0, vy as f64 + h / 2.0)];
                     let u: Vec<[f32; 2]> = corners.iter().map(|(x, y)| info.pages[i].view_to_user(*x as f32, *y as f32)).collect();
                     let rect = [u[0][0].min(u[1][0]) as f64, u[0][1].min(u[1][1]) as f64, u[0][0].max(u[1][0]) as f64, u[0][1].max(u[1][1]) as f64];
-                    let by = (kind.group() == pdfcraft_engine::StampGroup::Dynamic).then(|| by_line.clone());
-                    let shape = pdfcraft_engine::Shape::Stamp { rect, stamp: kind, by };
-                    view.pending_edit = Some(pdfcraft_engine::Edit::AddAnnotation(pdfcraft_engine::NewAnnotation {
+                    let by = (kind.group() == englat_pdf_engine::StampGroup::Dynamic).then(|| by_line.clone());
+                    let shape = englat_pdf_engine::Shape::Stamp { rect, stamp: kind, by };
+                    view.pending_edit = Some(englat_pdf_engine::Edit::AddAnnotation(englat_pdf_engine::NewAnnotation {
                         page: i,
-                        style: pdfcraft_engine::Style::default_for(&shape),
+                        style: englat_pdf_engine::Style::default_for(&shape),
                         shape,
                         contents: String::new(),
                         author: author.clone(),
@@ -2927,11 +2927,11 @@ pub fn document_area(app: &mut PdfCraftApp, index: usize, ui: &mut egui::Ui) {
                     let (vx, vy) = xf.screen_to_view(p);
                     let u = info.pages[i].view_to_user(vx, vy);
                     let (x, y) = (u[0] as f64, u[1] as f64);
-                    view.pending_edit = Some(pdfcraft_engine::Edit::AddCustomStamp {
+                    view.pending_edit = Some(englat_pdf_engine::Edit::AddCustomStamp {
                         page: i,
                         rect: [x, y, x, y],
                         name: cs.name.clone(),
-                        file: pdfcraft_engine::MarkFile { name: cs.file.clone(), bytes: cs.data.clone(), page: cs.page },
+                        file: englat_pdf_engine::MarkFile { name: cs.file.clone(), bytes: cs.data.clone(), page: cs.page },
                         author: author.clone(),
                     });
                     stamp_placed = true;
@@ -3306,8 +3306,8 @@ pub fn document_area(app: &mut PdfCraftApp, index: usize, ui: &mut egui::Ui) {
             // red border. Radio buttons are round, and so is theirs (as in Acrobat).
             if view.highlight_fields {
                 for f in form.iter() {
-                    let required = f.has(pdfcraft_engine::field_flags::REQUIRED);
-                    let round = f.kind == pdfcraft_engine::FormFieldKind::Radio;
+                    let required = f.has(englat_pdf_engine::field_flags::REQUIRED);
+                    let round = f.kind == englat_pdf_engine::FormFieldKind::Radio;
                     for w in f.widgets.iter().filter(|w| w.page == Some(i) && !w.hidden) {
                         let r = w.rect;
                         let sr = xf.user_rect(info, i, [r[0] as f32, r[1] as f32, r[2] as f32, r[3] as f32]);
@@ -3738,7 +3738,7 @@ pub fn document_area(app: &mut PdfCraftApp, index: usize, ui: &mut egui::Ui) {
     }
     let form_notice = view.forms.notice.take();
     // One crop, then back to selecting (as Acrobat does).
-    let cropped = view.pending_edit.as_ref().is_some_and(|e| matches!(e, pdfcraft_engine::Edit::SetPageBox { .. }));
+    let cropped = view.pending_edit.as_ref().is_some_and(|e| matches!(e, englat_pdf_engine::Edit::SetPageBox { .. }));
     let mut tool = app.quick_tool;
     comments::keys(ui.ctx(), view, &mut tool, allowed);
     if preparing {
@@ -3841,9 +3841,9 @@ pub fn document_area(app: &mut PdfCraftApp, index: usize, ui: &mut egui::Ui) {
         app.views[index].pending_edit = Some(if app.quick_tool == QuickTool::Comment(comments::CommentTool::Highlight) {
             // An area highlight: a highlight over the box.
             let style = app.comment_prefs.style(comments::CommentTool::Highlight);
-            pdfcraft_engine::Edit::AddAnnotation(pdfcraft_engine::NewAnnotation {
+            englat_pdf_engine::Edit::AddAnnotation(englat_pdf_engine::NewAnnotation {
                 page,
-                shape: pdfcraft_engine::Shape::TextMarkup { kind: pdfcraft_engine::Markup::Highlight, quads },
+                shape: englat_pdf_engine::Shape::TextMarkup { kind: englat_pdf_engine::Markup::Highlight, quads },
                 style,
                 contents: String::new(),
                 author,
@@ -3979,9 +3979,9 @@ fn selection_actions(
         SelectionAction::Markup(tool) => {
             // Every markup button carries a markup tool; anything else adds nothing.
             let Some(kind) = tool.markup() else { return false };
-            view.pending_edit = Some(Edit::AddAnnotation(pdfcraft_engine::NewAnnotation {
+            view.pending_edit = Some(Edit::AddAnnotation(englat_pdf_engine::NewAnnotation {
                 page,
-                shape: pdfcraft_engine::Shape::TextMarkup { kind, quads },
+                shape: englat_pdf_engine::Shape::TextMarkup { kind, quads },
                 style: prefs.style(tool),
                 contents: String::new(),
                 author: prefs.author.clone(),
@@ -3994,8 +3994,8 @@ fn selection_actions(
 }
 
 /// Run a push button's action (the ones that need no JavaScript engine).
-fn run_button(app: &mut PdfCraftApp, index: usize, name: &str, action: pdfcraft_engine::form_scripts::ButtonAction) {
-    use pdfcraft_engine::form_scripts::ButtonAction as B;
+fn run_button(app: &mut EnglatPdfApp, index: usize, name: &str, action: englat_pdf_engine::form_scripts::ButtonAction) {
+    use englat_pdf_engine::form_scripts::ButtonAction as B;
     let pages = app.session.get(app.views[index].id).map_or(0, |d| d.info.pages.len());
     match action {
         B::Reset { fields, exclude } => {
@@ -4007,11 +4007,11 @@ fn run_button(app: &mut PdfCraftApp, index: usize, name: &str, action: pdfcraft_
                 (false, true) => Some(all.iter().filter(|n| !listed(n)).cloned().collect()),
             };
             app.views[index].forms.focus = None;
-            app.views[index].pending_edit = Some(pdfcraft_engine::Edit::ResetForm { names });
+            app.views[index].pending_edit = Some(englat_pdf_engine::Edit::ResetForm { names });
         }
         B::Named(n) => match n.as_str() {
             "Print" => app.open_print(),
-            // What PdfCraft's XFA buttons use, and what a script's `execMenuItem("Save")`
+            // What ENGLAT PDF's XFA buttons use, and what a script's `execMenuItem("Save")`
             // does too: the Save As dialog, so a click never overwrites the file unasked.
             "SaveAs" => app.run_command("file.save_as"),
             "NextPage" => app.views[index].step_page(true),
@@ -4025,13 +4025,13 @@ fn run_button(app: &mut PdfCraftApp, index: usize, name: &str, action: pdfcraft_
         B::ShowHide { fields, hide } => {
             let listed = |n: &String| fields.iter().any(|f| n == f || n.starts_with(&format!("{f}.")));
             // `display.hidden` 1, `display.visible` 0, as a script setting `field.display` would.
-            let changes: Vec<pdfcraft_engine::FieldChange> = app
+            let changes: Vec<englat_pdf_engine::FieldChange> = app
                 .session
                 .get(app.views[index].id)
                 .map(|d| d.form.iter().filter(|f| listed(&f.name)).map(|f| f.name.clone()).collect::<Vec<_>>())
                 .unwrap_or_default()
                 .into_iter()
-                .map(|name| pdfcraft_engine::FieldChange {
+                .map(|name| englat_pdf_engine::FieldChange {
                     name,
                     value: None,
                     read_only: None,
@@ -4042,11 +4042,11 @@ fn run_button(app: &mut PdfCraftApp, index: usize, name: &str, action: pdfcraft_
             if !changes.is_empty() {
                 let label = if hide { "Hide a field" } else { "Show a field" };
                 app.views[index].pending_edit =
-                    Some(pdfcraft_engine::Edit::Batch { label: label.into(), edits: vec![pdfcraft_engine::Edit::ApplyScriptChanges { changes }] });
+                    Some(englat_pdf_engine::Edit::Batch { label: label.into(), edits: vec![englat_pdf_engine::Edit::ApplyScriptChanges { changes }] });
             }
         }
         B::SetLayers { changes, preserve_rb } => {
-            use pdfcraft_engine::form_scripts::LayerOp as Op;
+            use englat_pdf_engine::form_scripts::LayerOp as Op;
             let changes: Vec<(LayerOp, (u32, u16))> = changes
                 .into_iter()
                 .map(|(op, ocg)| {
@@ -4062,7 +4062,7 @@ fn run_button(app: &mut PdfCraftApp, index: usize, name: &str, action: pdfcraft_
         }
         B::Alert(m) => app.notify(m),
         B::Submit(url) => app.notify_fmt(
-            "{name} submits the form to {url}; PdfCraft doesn't send form data. Save the document to keep your entries.",
+            "{name} submits the form to {url}; ENGLAT PDF doesn't send form data. Save the document to keep your entries.",
             &[("name", name), ("url", &url)],
         ),
         B::ImportIcon => app.choose_field_image(name),
@@ -4075,7 +4075,7 @@ fn run_button(app: &mut PdfCraftApp, index: usize, name: &str, action: pdfcraft_
 
 /// Run a set-layer-visibility action from a button or link. It changes what is shown, as the
 /// Layers panel does (which follows), not the document.
-fn set_layers(app: &mut PdfCraftApp, index: usize, changes: &[(LayerOp, (u32, u16))], preserve_rb: bool) {
+fn set_layers(app: &mut EnglatPdfApp, index: usize, changes: &[(LayerOp, (u32, u16))], preserve_rb: bool) {
     let id = app.views[index].id;
     if app.session.set_layer_state(id, changes, preserve_rb) {
         app.views[index].invalidate_content();
@@ -4237,7 +4237,7 @@ enum Notice {
 /// off, security, forms and warnings.
 fn notices(
     view: &mut DocView,
-    doc: &pdfcraft_engine::Document,
+    doc: &englat_pdf_engine::Document,
     secured: bool,
     repaired: bool,
     signed: Option<(&str, Color32, &str, String)>,
@@ -4329,19 +4329,19 @@ fn notices(
             text.push('.');
         }
         Some(("text-cursor-input", text, true))
-    } else if info.xfa == Some(pdfcraft_render::Xfa::Dynamic) {
+    } else if info.xfa == Some(englat_pdf_render::Xfa::Dynamic) {
         Some((
             "triangle-alert",
-            tl!("This is a dynamic XFA form, which PdfCraft can't display yet. What you see is the file's placeholder page.").to_string(),
+            tl!("This is a dynamic XFA form, which ENGLAT PDF can't display yet. What you see is the file's placeholder page.").to_string(),
             false,
         ))
-    } else if info.xfa == Some(pdfcraft_render::Xfa::Static) {
+    } else if info.xfa == Some(englat_pdf_render::Xfa::Static) {
         Some((
             "text-cursor-input",
             tl!("XFA form: its fields and its XFA data are kept in step, so other viewers show what you fill in.").to_string(),
             true,
         ))
-    } else if info.fields.iter().any(|f| f.kind != pdfcraft_render::FieldKind::PushButton) {
+    } else if info.fields.iter().any(|f| f.kind != englat_pdf_render::FieldKind::PushButton) {
         // Push buttons alone (LaTeX `animate` frames, navigation buttons) leave nothing to fill in.
         Some((
             "text-cursor-input",
@@ -4424,7 +4424,7 @@ fn notice_bar(ui: &mut egui::Ui, t: &Tokens, icon: &str, icon_color: Color32, te
 }
 
 /// The floating quick-action bar at the left edge of the document area.
-fn quick_bar(app: &mut PdfCraftApp, area: Rect, ui: &mut egui::Ui) {
+fn quick_bar(app: &mut EnglatPdfApp, area: Rect, ui: &mut egui::Ui) {
     let t = Tokens::get(ui.ctx());
     let pos = area.left_top() + vec2(14.0, 14.0);
     egui::Area::new(egui::Id::new("quick-bar")).order(egui::Order::Middle).fixed_pos(pos).show(ui.ctx(), |ui| {
@@ -5056,7 +5056,7 @@ fn organize_grid(view: &mut DocView, info: &DocInfo, editable: bool, dirty: bool
 
 /// A rendered raster as texture data. Its words are premultiplied RGBA bytes, exactly
 /// `Color32`s, so the renderer's buffer becomes the image without a copy on the UI thread.
-pub(crate) fn texture_image(size: [usize; 2], pixels: pdfcraft_render::Pixels) -> egui::ColorImage {
+pub(crate) fn texture_image(size: [usize; 2], pixels: englat_pdf_render::Pixels) -> egui::ColorImage {
     match bytemuck::allocation::try_cast_vec::<u32, Color32>(pixels.into_words()) {
         Ok(px) if px.len() == size[0].saturating_mul(size[1]) => egui::ColorImage::new(size, px),
         Ok(px) => egui::ColorImage::from_rgba_premultiplied(size, bytemuck::cast_slice(&px)),
@@ -5124,8 +5124,8 @@ mod tests {
         }
     }
 
-    fn annotation(fill_sign: bool) -> pdfcraft_render::Annotation {
-        pdfcraft_render::Annotation {
+    fn annotation(fill_sign: bool) -> englat_pdf_render::Annotation {
+        englat_pdf_render::Annotation {
             page: 0,
             subtype: "FreeText".into(),
             author: None,
@@ -5150,8 +5150,8 @@ mod tests {
         assert_eq!(annotation_hover_text(&annotation(true)), None);
     }
 
-    fn signature(signed: bool, visible: bool, page: Option<usize>, rect: Option<[f64; 4]>) -> pdfcraft_engine::SignatureInfo {
-        pdfcraft_engine::SignatureInfo {
+    fn signature(signed: bool, visible: bool, page: Option<usize>, rect: Option<[f64; 4]>) -> englat_pdf_engine::SignatureInfo {
+        englat_pdf_engine::SignatureInfo {
             field: "Signature1".into(),
             signed,
             page,
@@ -5174,8 +5174,8 @@ mod tests {
             algorithm: None,
             timestamp: false,
             timestamp_time: None,
-            status: pdfcraft_engine::SignatureStatus::Valid,
-            modification: pdfcraft_engine::sign::Modification::None,
+            status: englat_pdf_engine::SignatureStatus::Valid,
+            modification: englat_pdf_engine::sign::Modification::None,
             details: Vec::new(),
         }
     }
@@ -5259,7 +5259,7 @@ mod tests {
 endstream endobj
 trailer << /Root 1 0 R >>
 %%EOF";
-        let mut r = pdfcraft_render::PageRenderer::new(Arc::new(pdf.to_vec()), Default::default());
+        let mut r = englat_pdf_render::PageRenderer::new(Arc::new(pdf.to_vec()), Default::default());
         let out = r.render(RenderRequest { page: 0, kind: RequestKind::Pixels, tile: None, scale: 1.5, tag: 0, preview: false });
         assert!(out.error.is_none(), "{:?}", out.error);
         let size = [out.width as usize, out.height as usize];
@@ -5306,9 +5306,9 @@ trailer << /Root 1 0 R >>
     }
 
     fn view(pages: usize, layout: PageLayout, continuous: bool) -> DocView {
-        let info = pdfcraft_render::DocInfo {
+        let info = englat_pdf_render::DocInfo {
             pages: (0..pages)
-                .map(|_| pdfcraft_render::PageInfo { width: 300.0, height: 400.0, label: String::new(), crop: [0.0, 0.0, 300.0, 400.0], rotation: 0 })
+                .map(|_| englat_pdf_render::PageInfo { width: 300.0, height: 400.0, label: String::new(), crop: [0.0, 0.0, 300.0, 400.0], rotation: 0 })
                 .collect(),
             ..Default::default()
         };
@@ -5319,8 +5319,8 @@ trailer << /Root 1 0 R >>
         let mut v = view(5, PageLayout::Single, true);
         v.texts.insert(
             3,
-            pdfcraft_render::PageText {
-                glyphs: vec![pdfcraft_render::TextGlyph {
+            englat_pdf_render::PageText {
+                glyphs: vec![englat_pdf_render::TextGlyph {
                     text: "match".into(),
                     rect: [20.0, 260.0, 60.0, 280.0],
                     quad: [[20.0, 260.0], [60.0, 260.0], [60.0, 280.0], [20.0, 280.0]],
@@ -5411,7 +5411,7 @@ trailer << /Root 1 0 R >>
         let info = thumbnail_info(100);
         let mut v = DocView::new(DocId(1), &info, ViewDefaults::default());
         let text = PageText {
-            glyphs: vec![pdfcraft_render::TextGlyph { text: "x".into(), rect: [0.0, 0.0, 10.0, 10.0], quad: [[0.0, 0.0]; 4], direction: [1.0, 0.0] }],
+            glyphs: vec![englat_pdf_render::TextGlyph { text: "x".into(), rect: [0.0, 0.0, 10.0, 10.0], quad: [[0.0, 0.0]; 4], direction: [1.0, 0.0] }],
             line_of: vec![0],
             space_before: vec![false],
         };
@@ -5448,7 +5448,7 @@ trailer << /Root 1 0 R >>
                         1 => (200.0, 4000.0),
                         _ => (4000.0, 200.0),
                     };
-                    pdfcraft_render::PageInfo { width, height, label: (i + 1).to_string(), crop: [0.0, 0.0, width, height], rotation: 0 }
+                    englat_pdf_render::PageInfo { width, height, label: (i + 1).to_string(), crop: [0.0, 0.0, width, height], rotation: 0 }
                 })
                 .collect(),
             ..Default::default()
@@ -5506,12 +5506,12 @@ trailer << /Root 1 0 R >>
         assert!(bytes <= THUMB_BYTES);
     }
 
-    fn solid_result(request: RenderRequest, w: u32, h: u32) -> pdfcraft_render::RenderedPage {
-        pdfcraft_render::RenderedPage {
+    fn solid_result(request: RenderRequest, w: u32, h: u32) -> englat_pdf_render::RenderedPage {
+        englat_pdf_render::RenderedPage {
             request,
             width: w,
             height: h,
-            rgba: pdfcraft_render::Pixels::from(vec![u32::MAX; rgba_bytes(w as usize, h as usize) / 4]),
+            rgba: englat_pdf_render::Pixels::from(vec![u32::MAX; rgba_bytes(w as usize, h as usize) / 4]),
             text: None,
             error: None,
             warnings: Vec::new(),
@@ -5711,7 +5711,7 @@ trailer << /Root 1 0 R >>
     #[test]
     fn many_open_documents_share_one_raster_allowance_and_close_releases_handles() {
         let ctx = egui::Context::default();
-        let mut app = PdfCraftApp::new();
+        let mut app = EnglatPdfApp::new();
         let bytes = app.session.create_blank(612.0, 792.0, 1).unwrap();
         let mut expected = Vec::new();
         for index in 0..6 {
@@ -5774,8 +5774,8 @@ trailer << /Root 1 0 R >>
         let ctx = egui::Context::default();
         let mut png = std::io::Cursor::new(Vec::new());
         image::RgbaImage::from_pixel(12, 4, image::Rgba([20, 30, 40, 255])).write_to(&mut png, image::ImageFormat::Png).unwrap();
-        let image = pdfcraft_engine::SignatureImage::from_bytes(png.get_ref()).unwrap();
-        let mut session = pdfcraft_engine::Session::new();
+        let image = englat_pdf_engine::SignatureImage::from_bytes(png.get_ref()).unwrap();
+        let mut session = englat_pdf_engine::Session::new();
         let blank = session.create_blank(300.0, 400.0, 1).unwrap();
         let id = session.open_new("signature-preview.pdf", blank).unwrap();
         let info = session.get(id).unwrap().info.pages[0].clone();
@@ -5837,7 +5837,7 @@ trailer << /Root 1 0 R >>
     #[test]
     fn edit_text_boxes_stay_drawn_while_page_input_is_blocked() {
         let mut h = egui_kittest::Harness::builder().with_size(vec2(1400.0, 900.0)).build_eframe(|_cc| {
-            let mut app = PdfCraftApp::new();
+            let mut app = EnglatPdfApp::new();
             let bytes = app.session.create_blank(300.0, 400.0, 1).unwrap();
             app.open_bytes("blank.pdf", None, bytes.as_ref().clone()).unwrap();
             app.quick_tool = QuickTool::EditText;
@@ -5859,7 +5859,7 @@ trailer << /Root 1 0 R >>
         use egui_kittest::kittest::Queryable;
 
         let mut h = egui_kittest::Harness::builder().with_size(vec2(1400.0, 900.0)).build_eframe(|_cc| {
-            let mut app = PdfCraftApp::new();
+            let mut app = EnglatPdfApp::new();
             let bytes = app.session.create_blank(300.0, 400.0, 100).unwrap();
             app.open_bytes("organize-gaps.pdf", None, bytes.as_ref().clone()).unwrap();
             app.views[0].organize = true;
@@ -5889,7 +5889,7 @@ trailer << /Root 1 0 R >>
     #[test]
     fn real_shell_pages_organizer_and_print_only_collect_current_thumbnail_consumers() {
         let mut h = egui_kittest::Harness::builder().with_size(vec2(1400.0, 900.0)).build_eframe(|_cc| {
-            let mut app = PdfCraftApp::new();
+            let mut app = EnglatPdfApp::new();
             let bytes = app.session.create_blank(612.0, 792.0, 10_000).unwrap();
             app.open_bytes("synthetic-ten-thousand.pdf", None, bytes.as_ref().clone()).unwrap();
             app.right = Some(RightPanel::Pages);
@@ -5995,7 +5995,7 @@ trailer << /Root 1 0 R >>
     #[test]
     fn fit_page_and_height_hold_still_while_mixed_page_sizes_scroll_past() {
         let page =
-            |width: f32, height: f32| pdfcraft_render::PageInfo { width, height, label: String::new(), crop: [0.0, 0.0, width, height], rotation: 0 };
+            |width: f32, height: f32| englat_pdf_render::PageInfo { width, height, label: String::new(), crop: [0.0, 0.0, width, height], rotation: 0 };
         let info = DocInfo { pages: vec![page(300.0, 400.0), page(600.0, 800.0)], ..Default::default() };
         for fit in [Fit::Page, Fit::Height] {
             let mut v = DocView::new(DocId(1), &info, ViewDefaults::default());
@@ -6018,7 +6018,7 @@ trailer << /Root 1 0 R >>
     #[test]
     fn fit_width_fits_the_shown_page_in_single_page_view_only() {
         let page =
-            |width: f32, height: f32| pdfcraft_render::PageInfo { width, height, label: String::new(), crop: [0.0, 0.0, width, height], rotation: 0 };
+            |width: f32, height: f32| englat_pdf_render::PageInfo { width, height, label: String::new(), crop: [0.0, 0.0, width, height], rotation: 0 };
         let info = DocInfo { pages: vec![page(300.0, 400.0), page(600.0, 400.0)], ..Default::default() };
         let mut v = DocView::new(DocId(1), &info, ViewDefaults::default());
         (v.fit, v.viewport_w, v.viewport_h) = (Fit::Width, 1000.0, 800.0);
@@ -6044,7 +6044,7 @@ trailer << /Root 1 0 R >>
     #[test]
     fn layouts_match_their_commands_and_names() {
         for l in PageLayout::ORDER {
-            let spec = pdfcraft_engine::commands::command(l.command()).expect("registered");
+            let spec = englat_pdf_engine::commands::command(l.command()).expect("registered");
             assert_eq!((l.label(), l.icon()), (spec.label, spec.icon), "{l:?}");
             assert_eq!(PageLayout::from_command(l.command()), Some(l));
             assert_eq!(PageLayout::try_parse(l.as_str()), Some(l));
@@ -6055,9 +6055,9 @@ trailer << /Root 1 0 R >>
 
     #[test]
     fn destinations_set_the_zoom_mode_and_the_point_to_show() {
-        let info = pdfcraft_render::DocInfo {
+        let info = englat_pdf_render::DocInfo {
             pages: (0..3)
-                .map(|_| pdfcraft_render::PageInfo { width: 300.0, height: 400.0, label: String::new(), crop: [0.0, 0.0, 300.0, 400.0], rotation: 0 })
+                .map(|_| englat_pdf_render::PageInfo { width: 300.0, height: 400.0, label: String::new(), crop: [0.0, 0.0, 300.0, 400.0], rotation: 0 })
                 .collect(),
             ..Default::default()
         };
@@ -6091,7 +6091,7 @@ trailer << /Root 1 0 R >>
         // A page past the end goes to the last page; a page the document info lacks, to its top.
         v.go_to_dest(usize::MAX, DestView::FitH { top: Some(100.0) }, &info);
         assert_eq!((v.current, v.goto_point.map(|g| g.0)), (2, Some(2)));
-        let empty = pdfcraft_render::DocInfo::default();
+        let empty = englat_pdf_render::DocInfo::default();
         v.go_to_dest(1, DestView::FitH { top: Some(100.0) }, &empty);
         assert_eq!((v.current, v.goto_point), (1, None));
     }
@@ -6112,7 +6112,7 @@ trailer << /Root 1 0 R >>
         let ctx = egui::Context::default();
         v.receive_result(
             &ctx,
-            pdfcraft_render::RenderedPage {
+            englat_pdf_render::RenderedPage {
                 request: req,
                 width: 0,
                 height: 0,

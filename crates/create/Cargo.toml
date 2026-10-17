@@ -1,5 +1,5 @@
 [package]
-name = "pdfcraft-create"
+name = "englat-pdf-create"
 description = "Create PDFs: blank documents, from images (PNG, JPEG) and from plain text"
 version.workspace = true
 edition.workspace = true
@@ -9,9 +9,9 @@ license.workspace = true
 workspace = true
 
 [dependencies]
-pdfcraft-cos = { workspace = true }
-pdfcraft-model = { workspace = true }
-pdfcraft-fonts = { workspace = true }
+englat-pdf-cos = { workspace = true }
+englat-pdf-model = { workspace = true }
+englat-pdf-fonts = { workspace = true }
 png = "0.18"
 tiff = "0.11"
 image = { version = "0.25", default-features = false, features = ["bmp", "gif", "jpeg"] }

@@ -9,12 +9,12 @@
 //!   Reply, Set status, Colour and Delete.
 //! - **Composer:** the floating "Add a comment" card used for new notes, text boxes and edits.
 //!
-//! Everything is turned into `pdfcraft_engine::Edit`s, queued on the view as `pending_edit` and
+//! Everything is turned into `englat_pdf_engine::Edit`s, queued on the view as `pending_edit` and
 //! applied by the app, so each change is one undo step.
 
 use egui::{Color32, CornerRadius, Pos2, Rect, Sense, Stroke, pos2, vec2};
-use pdfcraft_engine::{Edit, LineEnding, Markup, NewAnnotation, NoteIcon, ReviewState, Rgb, Shape, Style};
-use pdfcraft_render::{Annotation, DocInfo, PageInfo, PageText};
+use englat_pdf_engine::{Edit, LineEnding, Markup, NewAnnotation, NoteIcon, ReviewState, Rgb, Shape, Style};
+use englat_pdf_render::{Annotation, DocInfo, PageInfo, PageText};
 
 use crate::canvas::{DocView, PageXform};
 use crate::theme::{self, Tokens};
@@ -216,7 +216,7 @@ impl CommentTool {
             Self::Caret => Shape::Caret { rect: [0.0; 4] },
             Self::ReplaceText => Shape::TextMarkup { kind: Markup::StrikeOut, quads: Vec::new() },
             Self::Eraser => Shape::Ink { strokes: Vec::new() },
-            Self::Attach => Shape::Attachment { at: [0.0; 2], icon: pdfcraft_engine::AttachIcon::PushPin, file: String::new(), data: Vec::new() },
+            Self::Attach => Shape::Attachment { at: [0.0; 2], icon: englat_pdf_engine::AttachIcon::PushPin, file: String::new(), data: Vec::new() },
         }
     }
 }
@@ -1522,7 +1522,7 @@ pub(crate) fn caret_snap(text: &PageText, vx: f32, vy: f32) -> Option<([f32; 2],
     if !(slack.is_finite() && slack > 0.0) || vx < x0 - slack || vx > x1 + slack || vy < y0 - slack || vy > y1 + slack {
         return None;
     }
-    // The em box runs from 0.2 em below the baseline to 0.8 em above it (`pdfcraft_render`'s
+    // The em box runs from 0.2 em below the baseline to 0.8 em above it (`englat_pdf_render`'s
     // text extraction); `quad` is its bottom edge in the writing direction, then its top edge
     // backwards. Take the side of the box the click is nearer to: its foot and head.
     let [q0, q1, q2, q3] = g.quad;
@@ -1539,13 +1539,13 @@ pub(crate) fn caret_snap(text: &PageText, vx: f32, vy: f32) -> Option<([f32; 2],
 /// The box for `text` at `size` with its displayed top-left corner at `at`, on a page turned by
 /// `rotation` (its `/Rotate`): on a quarter-turned page it is taller than wide in user space.
 pub fn text_box_rect(at: [f64; 2], text: &str, size: f64, rotation: i64) -> [f64; 4] {
-    use pdfcraft_engine::annot_text::{text_width, wrap};
+    use englat_pdf_engine::annot_text::{text_width, wrap};
     let pad = 2.0;
     let longest = text.lines().map(|l| text_width(l, size)).fold(0.0, f64::max);
     let w = (longest + 2.0 * pad + 4.0).clamp(40.0, 300.0);
     let lines = wrap(text, size, w - 2.0 * pad).len().max(1);
     let h = lines as f64 * size * 1.2 + 2.0 * pad + 2.0;
-    pdfcraft_engine::text_box_at(rotation, at, w, h).unwrap_or([at[0], at[1] - h, at[0] + w, at[1]])
+    englat_pdf_engine::text_box_at(rotation, at, w, h).unwrap_or([at[0], at[1] - h, at[0] + w, at[1]])
 }
 
 /// The `/Rotate` of `page` (0 when it is unknown).
@@ -1624,7 +1624,7 @@ pub(crate) fn context_menu(ui: &mut egui::Ui, view: &mut DocView, info: &DocInfo
                     }
                 });
             });
-            let thread: Vec<&pdfcraft_render::Annotation> = info.annotations.iter().filter(|r| a.name.is_some() && r.in_reply_to == a.name).collect();
+            let thread: Vec<&englat_pdf_render::Annotation> = info.annotations.iter().filter(|r| a.name.is_some() && r.in_reply_to == a.name).collect();
             let marked = crate::comments_panel::is_marked(&thread);
             if ui.add_enabled(allowed, egui::Button::new(tl!(if marked { "Remove checkmark" } else { "Mark with checkmark" }))).clicked() {
                 action = Some(CanvasAction::Edit(Box::new(Edit::MarkAnnotation { page, index, marked: !marked, author: prefs.author.clone() })));
@@ -1682,7 +1682,7 @@ pub enum CanvasAction {
 const RECENT_CUSTOM: usize = 5;
 
 fn recent_custom_id() -> egui::Id {
-    egui::Id::new("pdfcraft-recent-custom-colours")
+    egui::Id::new("englat-pdf-recent-custom-colours")
 }
 
 /// Custom colours picked with "Other colour…" this session, newest first (#1193).
@@ -1909,7 +1909,7 @@ pub fn status_badge(state: &str) -> Option<(&'static str, &'static str, Color32)
 #[cfg(test)]
 mod tests {
     use super::*;
-    use pdfcraft_render::TextGlyph;
+    use englat_pdf_render::TextGlyph;
 
     /// One glyph per character, `w` points wide, on a line of `em`-point text whose baseline is at `y`, drawn
     /// along `direction` (a unit vector in view space, y down).
@@ -2099,7 +2099,7 @@ mod tests {
     fn tools_round_trip_through_their_commands() {
         for t in ALL {
             assert_eq!(CommentTool::from_command(t.command()), Some(t));
-            assert!(pdfcraft_engine::commands::command(t.command()).is_some(), "{} is registered", t.command());
+            assert!(englat_pdf_engine::commands::command(t.command()).is_some(), "{} is registered", t.command());
             assert!(icons::exists(t.icon()), "icon {}", t.icon());
             assert!(GROUPS[t.group()].contains(&t));
         }

@@ -1,5 +1,5 @@
 [package]
-name = "pdfcraft-audit"
+name = "englat-pdf-audit"
 description = "Verification tooling: audit documents for faux redactions (opaque covers over extractable text)"
 version.workspace = true
 edition.workspace = true
@@ -11,10 +11,10 @@ repository.workspace = true
 workspace = true
 
 [dependencies]
-pdfcraft-cos = { workspace = true }
-pdfcraft-content = { workspace = true }
-pdfcraft-edit = { workspace = true }
-pdfcraft-model = { workspace = true }
+englat-pdf-cos = { workspace = true }
+englat-pdf-content = { workspace = true }
+englat-pdf-edit = { workspace = true }
+englat-pdf-model = { workspace = true }
 thiserror = { workspace = true }
 
 [dev-dependencies]

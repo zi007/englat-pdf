@@ -3,7 +3,7 @@
 
 use std::sync::Arc;
 
-use pdfcraft_cos::Document;
+use englat_pdf_cos::Document;
 
 use crate::{AuditFinding, FindingKind, audit_redactions};
 
